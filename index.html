@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 an d'Evinelle — RSVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBEDE4;
+    --card:#FFFFFF;
+    --plum:#4A3B4C;
+    --plum-soft:#8A7A8C;
+    --amber:#F2A65A;
+    --amber-dark:#C97A2E;
+    --pink:#E8A0BC;
+    --pink-dark:#B85C82;
+    --sage:#9FB98A;
+    --sage-dark:#5F7A4B;
+    --line:#EFE2D6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--cream);
+    font-family:'Quicksand', sans-serif;
+    color:var(--plum);
+    display:flex;
+    justify-content:center;
+    padding:40px 16px 80px;
+  }
+  .wrap{width:100%; max-width:480px;}
+  .candle{ display:flex; justify-content:center; margin-bottom:8px; }
+  .flame{ animation:flicker 2.4s ease-in-out infinite; transform-origin:50% 100%; }
+  @keyframes flicker{
+    0%,100%{ transform:scale(1) rotate(0deg); }
+    30%{ transform:scale(1.05,0.96) rotate(-2deg); }
+    60%{ transform:scale(0.96,1.05) rotate(2deg); }
+  }
+  h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:28px;
+    text-align:center;
+    margin:4px 0 2px;
+    letter-spacing:0.2px;
+  }
+  .sub{
+    text-align:center;
+    color:var(--plum-soft);
+    font-size:15px;
+    margin:0 0 28px;
+    line-height:1.5;
+  }
+  .card{
+    background:var(--card);
+    border-radius:20px;
+    padding:28px 24px 24px;
+    box-shadow:0 2px 0 var(--line), 0 12px 30px -18px rgba(74,59,76,0.35);
+  }
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--plum-soft);
+    margin:0 0 8px;
+  }
+  input[type="text"]{
+    width:100%;
+    font-family:'Quicksand', sans-serif;
+    font-size:16px;
+    font-weight:500;
+    color:var(--plum);
+    padding:12px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:#FFFCFA;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type="text"]:focus{ border-color:var(--amber); }
+  .field{ margin-bottom:20px; }
+  .toggle-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .toggle{
+    padding:14px 10px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:#FFFCFA;
+    font-family:'Quicksand', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    color:var(--plum-soft);
+    cursor:pointer;
+    text-align:center;
+    transition:all .15s;
+  }
+  .toggle.yes.active{ background:#F1F8EC; border-color:var(--sage); color:var(--sage-dark); }
+  .toggle.no.active{ background:#FCEFF4; border-color:var(--pink); color:var(--pink-dark); }
+  .guests-field{ max-height:0; overflow:hidden; opacity:0; transition:all .25s ease; margin-bottom:0; }
+  .guests-field.open{ max-height:120px; opacity:1; margin-bottom:20px; }
+  select{
+    width:100%;
+    font-family:'Quicksand', sans-serif;
+    font-size:16px;
+    font-weight:500;
+    color:var(--plum);
+    padding:12px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:#FFFCFA;
+    outline:none;
+  }
+  button.submit{
+    width:100%;
+    margin-top:4px;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:var(--amber);
+    color:#fff;
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+  }
+  button.submit:hover{ background:var(--amber-dark); }
+  button.submit:active{ transform:scale(0.98); }
+  button.submit:disabled{ opacity:0.6; cursor:default; }
+  .error{ color:#B0453D; font-size:13px; margin:-12px 0 16px; display:none; }
+  .confirm{ display:none; text-align:center; padding:20px 4px 4px; }
+  .confirm .icon{ font-size:38px; margin-bottom:8px; }
+  .confirm h2{ font-family:'Fredoka', sans-serif; font-size:20px; font-weight:600; margin:0 0 6px; }
+  .confirm p{ color:var(--plum-soft); font-size:14px; margin:0; line-height:1.5;}
+  .form-body.hidden{ display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="candle">
+    <svg width="64" height="90" viewBox="0 0 64 90" role="img" aria-label="Bougie numéro 1">
+      <ellipse class="flame" cx="32" cy="16" rx="9" ry="14" fill="#F2A65A"/>
+      <ellipse class="flame" cx="32" cy="18" rx="5" ry="8" fill="#FFD9A0"/>
+      <rect x="12" y="32" width="40" height="52" rx="6" fill="#E8A0BC"/>
+      <text x="32" y="68" font-family="Fredoka, sans-serif" font-size="34" font-weight="600" fill="#fff" text-anchor="middle">1</text>
+    </svg>
+  </div>
+
+  <h1>Evinelle fête son 1er anniversaire !</h1>
+  <p class="sub">Un petit mot pour dire si tu seras des nôtres 🎈</p>
+
+  <div class="card" id="formCard">
+    <div class="form-body" id="formBody">
+      <div class="field">
+        <label for="nameInput">Ton nom</label>
+        <input type="text" id="nameInput" placeholder="Prénom et nom">
+        <p class="error" id="nameError">Indique ton nom avant de valider.</p>
+      </div>
+
+      <div class="field">
+        <label>Seras-tu présent ?</label>
+        <div class="toggle-row">
+          <div class="toggle yes" id="toggleYes">Je serai là</div>
+          <div class="toggle no" id="toggleNo">Je ne peux pas</div>
+        </div>
+        <p class="error" id="statusError">Choisis une réponse avant de valider.</p>
+      </div>
+
+      <div class="guests-field" id="guestsField">
+        <label for="guestsSelect">Nombre de personnes (toi inclus)</label>
+        <select id="guestsSelect">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <button class="submit" id="submitBtn">Valider ma réponse</button>
+      <p class="error" id="submitError">Un problème est survenu, réessaie dans un instant.</p>
+    </div>
+
+    <div class="confirm" id="confirmBox">
+      <div class="icon">🎉</div>
+      <h2 id="confirmTitle">Merci !</h2>
+      <p id="confirmText">Ta réponse a été enregistrée.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// URL Formspree — les réponses sont envoyées ici et consultables uniquement
+// en te connectant à ton compte Formspree (formspree.io)
+const FORM_ENDPOINT = 'https://formspree.io/f/xbgrzdzy';
+
+let status = null;
+
+const toggleYes = document.getElementById('toggleYes');
+const toggleNo = document.getElementById('toggleNo');
+const guestsField = document.getElementById('guestsField');
+const nameInput = document.getElementById('nameInput');
+const nameError = document.getElementById('nameError');
+const statusError = document.getElementById('statusError');
+const submitBtn = document.getElementById('submitBtn');
+const submitError = document.getElementById('submitError');
+
+toggleYes.addEventListener('click', () => {
+  status = 'yes';
+  toggleYes.classList.add('active');
+  toggleNo.classList.remove('active');
+  guestsField.classList.add('open');
+  statusError.style.display = 'none';
+});
+toggleNo.addEventListener('click', () => {
+  status = 'no';
+  toggleNo.classList.add('active');
+  toggleYes.classList.remove('active');
+  guestsField.classList.remove('open');
+  statusError.style.display = 'none';
+});
+nameInput.addEventListener('input', () => { nameError.style.display = 'none'; });
+
+submitBtn.addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  let ok = true;
+  if (!name) { nameError.style.display = 'block'; ok = false; }
+  if (!status) { statusError.style.display = 'block'; ok = false; }
+  if (!ok) return;
+
+  submitError.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Envoi…';
+
+  const guests = status === 'yes' ? parseInt(document.getElementById('guestsSelect').value, 10) : 0;
+
+  try {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        Nom: name,
+        Présence: status === 'yes' ? 'Présent' : 'Absent',
+        'Nombre de personnes': guests || '-'
+      })
+    });
+
+    if (!res.ok) throw new Error('Formspree error');
+
+    document.getElementById('formBody').classList.add('hidden');
+    document.getElementById('confirmBox').style.display = 'block';
+    document.getElementById('confirmTitle').textContent = status === 'yes' ? 'Génial, à bientôt !' : 'Merci pour ta réponse';
+    document.getElementById('confirmText').textContent = status === 'yes'
+      ? "On a hâte de fêter les 1 an d'Evinelle avec toi."
+      : 'Ta réponse a bien été enregistrée, dommage que tu ne puisses pas venir.';
+  } catch (e) {
+    submitError.style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Valider ma réponse';
+  }
+});
+</script>
+</body>
+</html>
