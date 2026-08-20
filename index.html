@@ -31,7 +31,15 @@
     justify-content:center;
     padding:40px 16px 80px;
   }
-  .wrap{width:100%; max-width:480px;}
+  #fireworks-canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:2;
+  }
+  .wrap{width:100%; max-width:480px; position:relative; z-index:3;}
   .candle{ display:flex; justify-content:center; margin-bottom:8px; }
   .flame{ animation:flicker 2.4s ease-in-out infinite; transform-origin:50% 100%; }
   @keyframes flicker{
@@ -44,8 +52,17 @@
     font-weight:600;
     font-size:28px;
     text-align:center;
-    margin:4px 0 2px;
+    margin:0;
     letter-spacing:0.2px;
+  }
+  .title-group{ text-align:center; }
+  .title-group .ampersand{
+    display:block;
+    margin:2px 0;
+    font-family:'Fredoka', sans-serif;
+    font-size:24px;
+    font-weight:600;
+    color:var(--amber-dark);
   }
   .sub{
     text-align:center;
@@ -142,6 +159,7 @@
 </style>
 </head>
 <body>
+<canvas id="fireworks-canvas" aria-hidden="true"></canvas>
 <div class="wrap">
 
   <div class="candle">
@@ -153,15 +171,20 @@
     </svg>
   </div>
 
-  <h1>Evinelle fête son 1er anniversaire !</h1>
-  <p class="sub">Un petit mot pour dire si tu seras des nôtres 🎈</p>
+  <div class="title-group">
+    <h1>Evinelle fête son 1er anniversaire !</h1>
+    <span class="ampersand">&amp;</span>
+    <h1>Lewis fête son 11ème anniversaire !</h1>
+  </div>
+
+  <p class="sub">Inscrit juste ton prénom pour dire si tu seras des nôtres 🎈</p>
 
   <div class="card" id="formCard">
     <div class="form-body" id="formBody">
       <div class="field">
         <label for="nameInput">Ton nom</label>
-        <input type="text" id="nameInput" placeholder="Prénom et nom">
-        <p class="error" id="nameError">Indique ton nom avant de valider.</p>
+        <input type="text" id="nameInput" placeholder="Prénom">
+        <p class="error" id="nameError">Indique ton prénom avant de valider.</p>
       </div>
 
       <div class="field">
@@ -201,6 +224,122 @@
 // URL Formspree — les réponses sont envoyées ici et consultables uniquement
 // en te connectant à ton compte Formspree (formspree.io)
 const FORM_ENDPOINT = 'https://formspree.io/f/xbgrzdzy';
+
+const fireworksCanvas = document.getElementById('fireworks-canvas');
+const fireworksContext = fireworksCanvas.getContext('2d');
+const fireworksColors = ['#F2A65A', '#E8A0BC', '#9FB98A', '#FFD9A0', '#FFFFFF'];
+const fireworks = [];
+const sparks = [];
+const pompoms = [];
+let lastLaunch = 0;
+
+function resizeFireworksCanvas() {
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  fireworksCanvas.width = window.innerWidth * pixelRatio;
+  fireworksCanvas.height = window.innerHeight * pixelRatio;
+  fireworksContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+}
+
+function launchFirework() {
+  fireworks.push({
+    x: Math.random() * window.innerWidth,
+    y: window.innerHeight + 8,
+    targetY: 80 + Math.random() * window.innerHeight * 0.42,
+    speed: 7 + Math.random() * 2,
+    color: fireworksColors[Math.floor(Math.random() * fireworksColors.length)]
+  });
+}
+
+function launchPompoms(x, y) {
+  for (let pompom = 0; pompom < 7; pompom += 1) {
+    pompoms.push({
+      x,
+      y,
+      velocityX: (Math.random() - 0.5) * 3,
+      velocityY: -1 - Math.random() * 2,
+      rotation: Math.random() * Math.PI,
+      rotationSpeed: (Math.random() - 0.5) * 0.12,
+      life: 1,
+      color: fireworksColors[Math.floor(Math.random() * fireworksColors.length)]
+    });
+  }
+}
+
+function animateFireworks(timestamp) {
+  fireworksContext.fillStyle = 'rgba(251, 237, 228, 0.18)';
+  fireworksContext.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  if (timestamp - lastLaunch > 750) {
+    launchFirework();
+    lastLaunch = timestamp;
+  }
+
+  fireworks.forEach((firework, index) => {
+    firework.y -= firework.speed;
+    fireworksContext.fillStyle = firework.color;
+    fireworksContext.beginPath();
+    fireworksContext.arc(firework.x, firework.y, 2, 0, Math.PI * 2);
+    fireworksContext.fill();
+
+    if (firework.y <= firework.targetY) {
+      launchPompoms(firework.x, firework.y);
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
+        sparks.push({
+          x: firework.x,
+          y: firework.y,
+          velocityX: Math.cos(angle) * (1.5 + Math.random() * 2),
+          velocityY: Math.sin(angle) * (1.5 + Math.random() * 2),
+          life: 1,
+          color: firework.color
+        });
+      }
+      fireworks.splice(index, 1);
+    }
+  });
+
+  sparks.forEach((spark, index) => {
+    spark.x += spark.velocityX;
+    spark.y += spark.velocityY;
+    spark.velocityY += 0.035;
+    spark.life -= 0.018;
+    fireworksContext.globalAlpha = Math.max(spark.life, 0);
+    fireworksContext.fillStyle = spark.color;
+    fireworksContext.beginPath();
+    fireworksContext.arc(spark.x, spark.y, 1.5, 0, Math.PI * 2);
+    fireworksContext.fill();
+    fireworksContext.globalAlpha = 1;
+
+    if (spark.life <= 0) sparks.splice(index, 1);
+  });
+
+  pompoms.forEach((pompom, index) => {
+    pompom.x += pompom.velocityX;
+    pompom.y += pompom.velocityY;
+    pompom.velocityY += 0.045;
+    pompom.rotation += pompom.rotationSpeed;
+    pompom.life -= 0.006;
+    fireworksContext.globalAlpha = Math.max(pompom.life, 0);
+    fireworksContext.save();
+    fireworksContext.translate(pompom.x, pompom.y);
+    fireworksContext.rotate(pompom.rotation);
+    fireworksContext.fillStyle = pompom.color;
+    fireworksContext.fillRect(-3, -3, 6, 6);
+    fireworksContext.restore();
+    fireworksContext.globalAlpha = 1;
+
+    if (pompom.life <= 0) pompoms.splice(index, 1);
+  });
+
+  requestAnimationFrame(animateFireworks);
+}
+
+resizeFireworksCanvas();
+window.addEventListener('resize', resizeFireworksCanvas);
+launchFirework();
+launchFirework();
+launchFirework();
+launchFirework();
+requestAnimationFrame(animateFireworks);
 
 let status = null;
 
